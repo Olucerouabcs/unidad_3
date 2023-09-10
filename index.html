@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue js</title>
+</head>
+<body>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <div id="app">
+        <h1>Hola: {{ message }}</h1>
+        <input v-model="message" placeholder="Editame" />
+
+        <br></br>
+
+        <button @click="count++">
+            El conteo es: {{ count }}
+        </button>
+
+        <br></br>
+
+        <input v-model="numero1" placeholder="numero 1" />
+        <input v-model="numero2" placeholder="numero 2" />
+
+        <button @click="resultado = (+numero1) + (+numero2)" >
+            Suma
+        </button>
+
+        <h2>La suma es: {{resultado }}</h2>
+
+
+    </div>
+
+    <script type="module">
+      import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+    
+      createApp({
+        setup() {
+         return {
+          count: ref(0),
+          message: ref(),
+          numero1:ref(""),
+          numero2:ref(""),
+          resultado:ref(0)
+         }
+        }
+      }).mount('#app')
+    </script>
+</body>
+</html>
