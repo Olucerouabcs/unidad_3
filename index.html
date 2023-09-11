@@ -8,25 +8,31 @@
 <body>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <div id="app">
-        <h1>Hola: {{ message }}</h1>
-        <input v-model="message" placeholder="Editame" />
 
-        <br></br>
+        <hr>
+        <ul>
+            <li v-for="person in persons">
+                {{person.name}} - {{person.lastName}}
+            </li>
+        </ul>
+        <form>
+            <fieldset>
+                <legend>
+                    Nombre:
+                </legend>
+                <input type="text" v-model="userName" name="">
+            </fieldset>
+            <fieldset>
+                <legend>
+                    Apellido(s):
+                </legend>
+                <input type="text" v-model="lastName" name="">
+            </fieldset>
 
-        <button @click="count++">
-            El conteo es: {{ count }}
-        </button>
-
-        <br></br>
-
-        <input v-model="numero1" placeholder="numero 1" />
-        <input v-model="numero2" placeholder="numero 2" />
-
-        <button @click="resultado = (+numero1) + (+numero2)" >
-            Suma
-        </button>
-
-        <h2>La suma es: {{resultado }}</h2>
+            <button type="button" v-on:click="addPerson">
+                Save data
+            </button>
+        </form>
 
 
     </div>
@@ -36,13 +42,28 @@
     
       createApp({
         setup() {
-         return {
-          count: ref(0),
-          message: ref(),
-          numero1:ref(""),
-          numero2:ref(""),
-          resultado:ref(0)
-         }
+            const userName = ref(""), lastName= ref("");
+            const persons = ref([])
+            return {
+                count:ref(0),
+                message:ref(),
+                numero1:ref(""),
+                numero2:ref(""),
+                resultado:ref(0),
+                userName,
+                lastName,
+                persons
+            }
+        },
+        methods:{
+           addPerson(){
+            const person ={
+                name: this.userName,
+                lastName: this.lastName
+            }
+            this.persons.push(person)
+            console.log(this.userName, this.lastName)
+           } 
         }
       }).mount('#app')
     </script>
