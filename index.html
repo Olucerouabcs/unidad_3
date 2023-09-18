@@ -6,8 +6,44 @@
     <title>Vue js</title>
 </head>
 <body>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <div id="app">
+    <div class="container" id="container_app">
+
+        <form action="">
+            <fieldset>
+                <legend>
+                    Email
+                </legend>
+                <input v-model="email" type="email" placeholder="Correo" name="">
+            </fieldset>
+            <fieldset>
+                <legend>
+                    Contraseña
+                </legend>
+                <input v-model="password" type="password" placeholder="Contraseña" name="">
+            </fieldset>
+
+            <button @click = 'login' type="button">Acceder</button>
+
+        </form>
+        <!--h1>Hola: {{ message }}</h1>
+        <input v-model="message" placeholder="Editame" />
+
+        <br></br>
+
+        <button @click="count++">
+            El conteo es: {{ count }}
+        </button>
+
+        <br></br>
+
+        <input v-model="numero1" placeholder="numero 1" />
+        <input v-model="numero2" placeholder="numero 2" />
+
+        <button @click="resultado = (+numero1) + (+numero2)" >
+            Suma
+        </button>
+
+        <h2>La suma es: {{resultado }}</h2>
 
         <hr>
         <ul>
@@ -32,40 +68,54 @@
             <button type="button" v-on:click="addPerson">
                 Save data
             </button>
-        </form>
+        </form-->
 
 
     </div>
-
-    <script type="module">
-      import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="text/javascript">
+      const { createApp, ref } = Vue
     
       createApp({
         setup() {
-            const userName = ref(""), lastName= ref("");
-            const persons = ref([])
+            users = ref([]);
+            email = ref('');
+            password = ref('');
             return {
-                count:ref(0),
-                message:ref(),
-                numero1:ref(""),
-                numero2:ref(""),
-                resultado:ref(0),
-                userName,
-                lastName,
-                persons
+                users,
+                email,
+                password
             }
         },
         methods:{
-           addPerson(){
-            const person ={
-                name: this.userName,
-                lastName: this.lastName
-            }
-            this.persons.push(person)
-            console.log(this.userName, this.lastName)
+           async login(){
+            const response = await fetch("users.json");
+            const users = await response.json();
+            
+            //2. recorrer los datos
+            users.forEach((users) => {
+                //comparar si existe
+                console.log(users.email);
+                console.log(users.password);
+                if(this.email == users.email){
+                    if(this.password == users.password){
+                        console.log("hola");
+                        return alert("Bienvenido");
+                    }else{
+                        alert("Datos incorrectos");
+                    }
+                }else{
+                    alert("Datos incorrectos");
+                }
+
+            });
+           
+            console.log(users)        
+            console.log("hola mundo")
+
            } 
         }
-      }).mount('#app')
+      }).mount('#container_app')
     </script>
 </body>
 </html>
