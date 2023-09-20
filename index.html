@@ -4,11 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vue js</title>
+    <style>
+        table.customTable {
+            width: 100%;
+            background-color: #FFFFFF;
+            border-collapse: collapse;
+            border-width: 2px;
+            border-color: #7EA8F8;
+            border-style: solid;
+            color: #000000;
+            }
+
+            table.customTable td, table.customTable th {
+            border-width: 2px;
+            border-color: #7EA8F8;
+            border-style: solid;
+            padding: 5px;
+            }
+
+            table.customTable thead {
+            background-color: #2DF885;
+            }
+    </style>
 </head>
 <body>
     <div class="container" id="container_app">
 
-        <form action="">
+        <form v-if="!is_Login">
             <fieldset>
                 <legend>
                     Email
@@ -26,49 +48,115 @@
 
         </form>
 
+        <table class="customTable" v-if="is_Login">
+            <thead>
+              <tr>
+                <th>Informacion personal</th>
+                <th>Informacion de contacto</th>
+                <th>Informacion de compañia</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="u in users">
+                <td>{{u.name}}, {{u.username}}</td>
+                <td>{{u.email}} - {{u.phone}}</td>
+                <td>{{u.company.name}}, {{u.company.bs}}</td>
+              </tr>
+            </tbody>
+        </table>
+
+        <button @click="logout" v-if="is_Login">Cerrar sesión</button>
+        
+
     </div>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script type="text/javascript">
+
       const { createApp, ref } = Vue
     
       createApp({
         setup() {
             users = ref([]);
             email = ref('');
-            password = ref('');
+            password = ref('');   
+
+            let tmp= localStorage.getItem("is_Login");
+            if(tmp == null){
+                tmp=false;
+            }
+
+            is_Login = ref(tmp); 
+            console.log("1",is_Login);
+
             return {
                 users,
                 email,
-                password
+                password,
+                is_Login
             }
+            
+            console.log("2",is_Login);
+        },
+        mounted: function(){
+
+            const getUsers = async () => {  
+                const response = await fetch("users.json");
+                const tmp_users = await response.json();
+                console.log(tmp_users)
+                this.users = tmp_users;
+            }
+            if(this.is_Login){
+                getUsers();
+            }
+
         },
         methods:{
            async login(){
-            const response = await fetch("users.json");
-            const users = await response.json();
+            //const response = await fetch("users.json");
+            //this.users = await response.json();
+
+           this.is_Login=false;
+           console.log("3",is_Login);
             
             //2. recorrer los datos
-            let encontrado = false;
-            users.forEach((users) => {
+            //let encontrado = false;
+            this.users.forEach((users) => {
                 //comparar si existe
-                console.log(users.email);
-                console.log(users.password);
+                //console.log(users.email);
+                //console.log(users.password);
+                
                 if(this.email == users.email){
                     if(this.password == users.password){
-                        encontrado = true;
+                        //encontrado = true;
+                        this.is_Login=true;
+                        alert("Bienvenido"); 
+                        localStorage.setItem("user_data",JSON.stringify(users));
+                        localStorage.setItem("is_Login","true");
+                        console.log("hola 3");
                     }
                 }
             });
-            if(encontrado){
-                alert("Bienvenido"); 
-            } else{
-                alert("Datos incorrectos");
-            }
-           
-            console.log(users)        
-            console.log("hola mundo")
 
-           } 
+            console.log("4",is_Login);
+
+            if(this.is_Login==false){
+                alert("Datos incorrectos");
+                console.log("hola 1");
+                console.log(is_Login);
+            } 
+           
+            //console.log(users)        
+            //console.log("hola mundo")
+
+           },
+           logout() {
+                console.log(is_Login);
+                this.is_Login = false;
+                localStorage.setItem("is_Login","false");
+                console.log("hola 2");
+                console.log(is_Login);
+            }
+
         }
       }).mount('#container_app')
     </script>
