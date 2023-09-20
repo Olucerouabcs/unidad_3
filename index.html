@@ -25,51 +25,6 @@
             <button @click = 'login' type="button">Acceder</button>
 
         </form>
-        <!--h1>Hola: {{ message }}</h1>
-        <input v-model="message" placeholder="Editame" />
-
-        <br></br>
-
-        <button @click="count++">
-            El conteo es: {{ count }}
-        </button>
-
-        <br></br>
-
-        <input v-model="numero1" placeholder="numero 1" />
-        <input v-model="numero2" placeholder="numero 2" />
-
-        <button @click="resultado = (+numero1) + (+numero2)" >
-            Suma
-        </button>
-
-        <h2>La suma es: {{resultado }}</h2>
-
-        <hr>
-        <ul>
-            <li v-for="person in persons">
-                {{person.name}} - {{person.lastName}}
-            </li>
-        </ul>
-        <form>
-            <fieldset>
-                <legend>
-                    Nombre:
-                </legend>
-                <input type="text" v-model="userName" name="">
-            </fieldset>
-            <fieldset>
-                <legend>
-                    Apellido(s):
-                </legend>
-                <input type="text" v-model="lastName" name="">
-            </fieldset>
-
-            <button type="button" v-on:click="addPerson">
-                Save data
-            </button>
-        </form-->
-
 
     </div>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -93,22 +48,22 @@
             const users = await response.json();
             
             //2. recorrer los datos
+            let encontrado = false;
             users.forEach((users) => {
                 //comparar si existe
                 console.log(users.email);
                 console.log(users.password);
                 if(this.email == users.email){
                     if(this.password == users.password){
-                        console.log("hola");
-                        return alert("Bienvenido");
-                    }else{
-                        alert("Datos incorrectos");
+                        encontrado = true;
                     }
-                }else{
-                    alert("Datos incorrectos");
                 }
-
             });
+            if(encontrado){
+                alert("Bienvenido"); 
+            } else{
+                alert("Datos incorrectos");
+            }
            
             console.log(users)        
             console.log("hola mundo")
