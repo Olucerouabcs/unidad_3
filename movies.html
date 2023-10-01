@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Movies</title>
+  <style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+    }
+    #app {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    }
+    table {
+    width: 100%;
+    border-collapse: collapse;
+    }
+    table th, table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    }
+    table th {
+    background-color: #007bff;
+    color: #fff;
+    }
+    table img {
+    max-width: 100px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    }
+    table tbody tr:nth-child(odd) {
+    background-color: #d1e7ff;
+    }
+    table tbody tr:hover {
+    background-color: #5faafa;
+    }
+    .logout-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+    }
+    .logout-button:hover {
+    background-color: #0056b3;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Películas</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Portada</th>
+          <th>Título</th>
+          <th>Puntuación</th>
+          <th>Fecha de lanzamiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="movie in movies" :key="movie.id" @click="selectMovie(movie.id)">
+          <td><img :src="'https://image.tmdb.org/t/p/w185/' + movie.poster_path" alt="Portada"></td>
+          <td>{{ movie.title }}</td>
+          <td>{{ movie.vote_average }}</td>
+          <td>{{ movie.release_date }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <button @click="LogOut" class="logout-button">Cerrar Sesión</button> 
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="text/javascript">
+    const { createApp, ref } = Vue;
+
+    const app = createApp({
+      setup() {
+        const movies = ref([]);
+
+        const selectedMovieId = ref(null);
+
+        fetch('https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc&api_key=fb78fb1043f6585094c940285994b4d6')
+          .then(response => response.json())
+          .then(data => {
+            movies.value = data.results;
+          })
+          .catch(error => console.error('Error al obtener datos:', error));
+
+        function selectMovie(movieId) {
+          selectedMovieId.value = movieId;
+          let peliId = selectedMovieId.value;
+          localStorage.setItem('movieId', peliId);
+          console.log('ID de la película seleccionada:', selectedMovieId.value);
+          window.location.href = 'movie.html'; 
+        }
+        function LogOut() {
+          window.location.href = 'index.html'; 
+        }
+
+        return {
+          movies,
+          selectMovie,
+          LogOut
+        };
+      }
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>

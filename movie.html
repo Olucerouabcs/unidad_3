@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie</title>
+  <style>
+
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    }
+
+    #app {
+    max-width: 600px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    }
+
+    h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 10px;
+    }
+
+    img {
+    display: block;
+    margin: 0 auto 20px;
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    p {
+    font-size: 16px;
+    color: #555;
+    margin: 10px 0;
+    }
+
+    span {
+    font-weight: bold;
+    color: #333;
+    }
+
+
+    p:nth-child(2) {
+    font-style: italic;
+    }
+
+    .back-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+    }
+
+    .back-button:hover {
+    background-color: #0056b3;
+    }
+
+    .select {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      margin-top: 20px;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+    }
+
+    .select:hover {
+      background-color: #0056b3;
+    }
+
+    .select:hover,
+    .select:focus {
+      cursor: pointer;
+    }
+
+    .select-style::after {
+      content: '\25BC'; 
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      font-size: 16px;
+    }
+
+    .delete-rating-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #ff0015;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+    }
+
+    .delete-rating-button:hover {
+    background-color: #b3001e;
+    }
+  </style>
+</head>
+<body>
+    <div id="app">
+        <button @click="volverAtras" class="back-button">Volver Atrás</button>
+        <h1>{{ movieDetails.title }}</h1>
+        <img :src="movieDetails.poster_path ? 'https://image.tmdb.org/t/p/w500/' + movieDetails.poster_path : ''" :alt="movieDetails.title" width="300">
+        <p>Resumen: {{ movieDetails.overview }}</p>
+        <p>Fecha de lanzamiento: {{ movieDetails.release_date }}</p>
+        <p>Calificación promedio: {{ movieDetails.vote_average }}</p>
+        <p>Géneros: 
+          <span v-for="(genre, index) in movieDetails.genres" :key="index">
+            {{ genre.name }}{{ index < movieDetails.genres.length - 1 ? ', ' : '' }}
+          </span>
+        </p>
+        <p>Duración: {{ movieDetails.runtime }} minutos</p>
+        <p>Presupuesto: ${{ movieDetails.budget }}</p>
+        <p>Ingresos: ${{ movieDetails.revenue }}</p>
+
+
+
+        <p v-if="selectedRating">Calificación dada: {{ selectedRating }} estrella(s)</p>
+
+
+        <label for="calificacion">Tu calificacion:</label>
+        <select id="calificacion" v-model="selectedRating" @change="calificarPelicula" class="select">
+          <option value="0" disabled>Calificación</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+        <button @click="eliminarCalificacion" class="delete-rating-button">Eliminar Calificación</button>
+
+    
+  </div>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script type="text/javascript">
+    const { createApp, ref } = Vue;
+
+    const app = createApp({
+      setup() {
+        const movieDetails = ref({});
+        const apiKey = 'fb78fb1043f6585094c940285994b4d6';
+        let movieId = localStorage.getItem('movieId');
+        console.log(movieId);
+        const apiUrl = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`;
+        const ratingUrl = `https://api.themoviedb.org/3/movie/${movieId}/rating`;
+        
+        const selectedRating = ref(null);
+
+        const fetchMovieDetails = () => {
+          fetch(apiUrl)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('La respuesta de la red no fue exitosa');
+              }
+              return response.json();
+            })
+            .then(data => {
+              movieDetails.value = data;
+            })
+            .catch(error => {
+              console.error('Error al cargar los detalles de la película:', error);
+            });
+        };
+
+        const calificarPelicula = () => {
+          if (selectedRating.value !== null) {
+            fetch(ratingUrl, {
+              method: 'POST',
+              headers: {
+                accept: 'application/json',
+                'Content-Type': 'application/json;charset=utf-8',
+                Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmYjc4ZmIxMDQzZjY1ODUwOTRjOTQwMjg1OTk0YjRkNiIsInN1YiI6IjY1MTQzYjgyOWI4NjE2MDBmZjY3OWNlZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.eGB5PtzldMglr8QBxbtSZJtH-qrvq7pXvRbhXHzNc1A'
+              },
+              body: JSON.stringify({
+                value: selectedRating.value,
+              }),
+            })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('La calificación no se pudo enviar');
+                }
+                console.log('La película ha sido calificada:', selectedRating.value);
+                fetchMovieDetails();
+              })
+              .catch(error => {
+                console.error('Error al calificar la película:', error);
+              });
+          }
+        };
+
+        const eliminarCalificacion = () => {
+          if (selectedRating.value !== null) {
+            fetch(ratingUrl, {
+              method: 'DELETE',
+              headers: {
+                accept: 'application/json',
+                'Content-Type': 'application/json;charset=utf-8',
+                Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJmYjc4ZmIxMDQzZjY1ODUwOTRjOTQwMjg1OTk0YjRkNiIsInN1YiI6IjY1MTQzYjgyOWI4NjE2MDBmZjY3OWNlZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.eGB5PtzldMglr8QBxbtSZJtH-qrvq7pXvRbhXHzNc1A'
+              },
+            })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('La calificación no se pudo eliminar');
+                }
+                console.log('La calificación ha sido eliminada');
+                selectedRating.value = null;
+              })
+              .catch(error => {
+                console.error('Error al eliminar la calificación:', error);
+              });
+          }
+        };
+        const volverAtras = () => {
+          window.location.href = 'movies.html';
+        };
+
+        fetchMovieDetails();
+        
+
+        return {
+          movieDetails,
+          selectedRating,
+          calificarPelicula,
+          eliminarCalificacion,
+          volverAtras
+        };
+      },
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>

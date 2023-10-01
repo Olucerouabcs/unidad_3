@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue js</title>
+    <style>
+        table.customTable {
+            width: 100%;
+            background-color: #FFFFFF;
+            border-collapse: collapse;
+            border-width: 2px;
+            border-color: #7EA8F8;
+            border-style: solid;
+            color: #000000;
+            }
+
+            table.customTable td, table.customTable th {
+            border-width: 2px;
+            border-color: #7EA8F8;
+            border-style: solid;
+            padding: 5px;
+            }
+
+            table.customTable thead {
+            background-color: #2DF885;
+            }
+
+            .rendered-form {
+                max-width: 400px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f4f4f4;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .rendered-form h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+                color: #333;
+            }
+
+
+            .formbuilder-text-label {
+                font-weight: bold;
+                margin-bottom: 5px;
+                color: #555;
+            }
+
+            .form-control {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+                box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.1);
+                font-size: 16px;
+                color: #333;
+            }
+
+             .form-button {
+                background-color: #24bd67; 
+                color: #fff;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+
+            .add-button {
+                background-color: #2DF885;
+                color: #000000;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-right: 20px;
+            }
+
+            .action-button {
+                background-color: #24bd67; 
+                color: #000000;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-left: 10px;
+                
+            }
+            .close-button {
+                background-color: #0c3b21; 
+                color: #ffffff;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-left: 10px;
+            }
+            
+    </style>
+</head>
+<body>
+    <div class="container" id="container_app">
+
+        <form v-if="!is_Login">
+            <fieldset>
+                <legend>
+                    Email
+                </legend>
+                <input v-model="email" type="email" placeholder="Correo" name="">
+            </fieldset>
+            <fieldset>
+                <legend>
+                    Contraseña
+                </legend>
+                <input v-model="password" type="password" placeholder="Contraseña" name="">
+            </fieldset>
+
+            <button @click = 'login' type="button">Acceder</button>
+
+        </form>
+        
+        <table class="customTable" v-if="is_Login">
+            <thead>
+              <tr>
+                <th>Personal data</th>
+                <th>Contact data</th>
+                <th>Company data</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="u in users">
+                <td>{{u.name}}, {{u.username}}</td>
+                <td>{{u.email}} - {{u.phone}}</td>
+                <td>{{u.company.name}}, {{u.company.bs}}</td>
+                <td>
+                    <button class="action-button" @click="edit(u)">Edit</button>
+                    <button class="action-button" @click="remove(u.id)" >Delete</button>
+                </td>
+              </tr>
+            </tbody>
+        </table>
+        <hr>
+        <button class="add-button" @click="add" v-if="is_Login">Add new record</button>
+        
+        <div class="rendered-form" v-show="action === 'add' || action === 'edit'">
+            <div class="">
+                <h1 access="false">{{ action === 'add' ? 'Add new user' : 'Edit user' }}</h1>
+            </div>
+            <div>
+                <label for="text-" class="formbuilder-text-label">Full name</label>
+                <input v-model="new_user.name" type="text" class="form-control">
+            </div>
+            <div>
+                <label for="text-" class="formbuilder-text-label">Email</label>
+                <input v-model="new_user.email" type="text" class="form-control">
+            </div>
+            <div>
+                <label for="text-" class="formbuilder-text-label">Company name</label>
+                <input v-model="new_user.company_name" type="text" class="form-control">
+            </div>
+            <input type="hidden" v-model="new_user.id" v-if="action === 'edit'">
+            <div>
+                <button class="form-button" type="button" @click="action === 'add' ? save('create') : save('update')">
+                    {{ action === 'add' ? 'Save user data' : 'Update user data' }}
+                </button>
+            </div>
+        </div>
+
+        <button class="close-button" @click="logout" v-if="is_Login">log out</button>
+        
+
+    </div>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="text/javascript">
+
+      const { createApp, ref } = Vue
+    
+      createApp({
+        setup() {
+            users = ref([]);
+            email = ref('');
+            password = ref('');   
+            action = ref('');
+            new_user = ref([]);
+
+            let tmp= localStorage.getItem("is_Login");
+            if(tmp == null){
+                tmp=false;
+            }
+
+            is_Login = ref(tmp); 
+            console.log("1",is_Login);
+
+            return {
+                users,
+                email,
+                password,
+                is_Login,
+                action,
+                new_user
+            }
+            
+            console.log("2",is_Login);
+        },
+        mounted: function(){
+
+            const getUsers = async () => {  
+                const response = await fetch("users.json");
+                const tmp_users = await response.json();
+                console.log(tmp_users)
+                this.users = tmp_users;
+            }
+            if(this.is_Login){
+                getUsers();
+            }
+
+        },
+        methods:{
+           async login(){
+            //const response = await fetch("users.json");
+            //this.users = await response.json();
+
+           this.is_Login=false;
+           console.log("3",is_Login);
+            
+            //2. recorrer los datos
+            //let encontrado = false;
+            this.users.forEach((users) => {
+                //comparar si existe
+                //console.log(users.email);
+                //console.log(users.password);
+                
+                if(this.email == users.email){
+                    if(this.password == users.password){
+                        //encontrado = true;
+                        this.is_Login=true;
+                        alert("Bienvenido"); 
+                        localStorage.setItem("user_data",JSON.stringify(users));
+                        localStorage.setItem("is_Login","true");
+                        console.log("hola 3");
+                    }
+                }
+            });
+
+            console.log("4",is_Login);
+
+            if(this.is_Login==false){
+                alert("Datos incorrectos");
+                console.log("hola 1");
+                console.log(is_Login);
+            } 
+           
+            //console.log(users)        
+            //console.log("hola mundo")
+
+           },
+           logout() {
+                console.log(is_Login);
+                this.is_Login = false;
+                localStorage.setItem("is_Login","false");
+                console.log("hola 2");
+                console.log(is_Login);
+                this.action = '';
+            },
+            add(){
+                this.new_user.name = '';
+                this.new_user.email = '';
+                this.new_user.company_name = '';
+                this.new_user.id = '';
+                this.action = 'add';
+            },
+            edit(target){
+                console.log("hola 2");
+                this.action = 'edit';
+                this.new_user.name = target.name;
+                this.new_user.email = target.email;
+                this.new_user.company_name = target.company.name;
+                this.new_user.id = target.id;
+            },
+            save(action){
+                let company = [];
+                company.name = this.new_user.company_name;
+                this.new_user.company = company;
+                if(action=='create'){
+                    
+                    this.new_user.id = microtime = (Date.now() % 1000) / 1000;
+
+                    this.users.push(this.new_user);
+
+                    this.new_user = [];
+
+                    alert("Registro exitoso");
+
+                }else{
+                    this.users.forEach((user) =>{
+                        if( user.id ==  this.new_user.id){
+                            user.name = this.new_user.name
+                            user.email = this.new_user.email
+                            user.company.name = this.new_user.company.name
+                            alert("Actualizacion exitosa");
+                            this.new_user.name = '';
+                            this.new_user.email = '';
+                            this.new_user.company_name = '';
+                            this.new_user.id = '';
+                        }
+                    })
+                }
+                this.action = '';
+
+            },
+            remove(id){
+                console.log(id);
+                let c = 0;
+                let i = 0;
+                this.users.forEach((user) =>{
+                    if( user.id == id){
+                        console.log(user.id);
+                        i=c;
+                    }
+                    c++;
+                })
+                console.log(i);
+                this.users.splice(i,1);
+            }
+
+        }
+      }).mount('#container_app')
+    </script>
+</body>
+</html>
